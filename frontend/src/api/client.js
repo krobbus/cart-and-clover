@@ -1,15 +1,17 @@
-const productionUrl = import.meta.env.PRODUCTION_API_URL?.trim().replace(/\/+$/, '');
+const PRODUCTION_API_URL = 'https://cartandclover-backend.onrender.com';
 const configuredBase = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '');
-const token = import.meta.env.TOKEN?.trim().replace(/\/+$/, '');
 
 function isPublicApiUrl(value) {
     if (!value) return false;
 
     try {
-        const url = new URL(value);
+        const { hostname, protocol } = new URL(value);
         return (
-            (url.protocol === 'http:' || url.protocol === 'https:') &&
-            !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)
+            (protocol === 'http:' || protocol === 'https:') &&
+            hostname !== 'localhost' &&
+            !hostname.endsWith('.localhost') &&
+            !hostname.startsWith('127.') &&
+            hostname !== '[::1]'
         );
     } catch {
         return false;
@@ -17,13 +19,15 @@ function isPublicApiUrl(value) {
 }
 
 const BASE = import.meta.env.PROD
-    ? (isPublicApiUrl(configuredBase) ? configuredBase : productionUrl)
+    ? (isPublicApiUrl(configuredBase) ? configuredBase : PRODUCTION_API_URL)
     : configuredBase || '';
 
+const TOKEN_KEY = 'key.token';
+
 export const tokenStore = {
-    get: () => localStorage.getItem(token),
-    set: (t) => localStorage.setItem(token, t),
-    clear: () => localStorage.removeItem(token),
+    get: () => localStorage.getItem(TOKEN_KEY),
+    set: (t) => localStorage.setItem(TOKEN_KEY, t),
+    clear: () => localStorage.removeItem(TOKEN_KEY),
 };
 
 export class ApiError extends Error {
