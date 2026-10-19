@@ -1,6 +1,5 @@
+import 'dotenv/config';
 import express from 'express';
-import { config } from 'dotenv';
-import { fileURLToPath } from 'url';
 import cors from 'cors';
 import connectDB from './config/db.js';
 import errorHandler from './middleware/errorMiddleware.js';
@@ -11,12 +10,15 @@ import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 
-config({ path: fileURLToPath(new URL('./.env', import.meta.url)) });
 connectDB();
 
 const app = express();
+const allowedOrigins = [
+    process.env.LOCAL_URL,
+    process.env.FRONTEND_URL,
+    process.env.BACKEND_URL
+].filter(Boolean);
 
-const allowedOrigins = (process.env.CLIENT_URL || '').split(',').filter(Boolean);
 app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : true }));
 app.use(express.json());
 
@@ -29,5 +31,6 @@ app.use('/api/users', userRoutes);
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.NODE_ENV === "development" ?
+    process.env.LOCAL_SERVER_PORT : process.env.RENDER_SERVER_PORT || process.env.LOCAL_SERVER_PORT;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
