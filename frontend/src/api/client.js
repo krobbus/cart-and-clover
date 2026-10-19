@@ -1,4 +1,26 @@
-const BASE = (import.meta.env.VITE_API_URL || '')
+const configuredBase = import.meta.env.VITE_API_URL?.replace(/\/+$/, '');
+const productionUrl = import.meta.env.PRODUCTION_API_URL?.replace(/\/+$/, '');
+
+function isLoopbackUrl(value) {
+    if (!value) return false;
+
+    try {
+        const hostname = new URL(value).hostname;
+        return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+    } catch {
+        return false;
+    }
+}
+
+const useProductionFallback = import.meta.env.PROD && isLoopbackUrl(configuredBase);
+const BASE = import.meta.env.PROD
+    ? (useProductionFallback ? productionUrl : configuredBase || productionUrl)
+    : configuredBase || '';
+
+if (useProductionFallback) {
+    console.warn(`Ignoring loopback VITE_API_URL in production; using ${productionUrl}.`);
+}
+
 const TOKEN_KEY = 'key.token';
 
 export const tokenStore = {
