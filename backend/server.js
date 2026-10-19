@@ -16,7 +16,8 @@ const app = express();
 const allowedOrigins = [
     'http://localhost:5173', 'https://localhost:5173',
     'http://127.0.0.1:5173', 'https://127.0.0.1:5173',
-    process.env.FRONTEND_URL, process.env.BACKEND_URL
+    'https://cart-and-clover.vercel.app', 
+    'https://cartandclover-backend.onrender.com'
 ].filter(Boolean);
 app.use(cors({
     origin: (origin, callback) => callback(null, !origin || allowedOrigins.includes(origin)),
