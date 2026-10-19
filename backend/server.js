@@ -14,9 +14,9 @@ connectDB();
 
 const app = express();
 const allowedOrigins = [
-    process.env.LOCAL_URL,
-    process.env.FRONTEND_URL,
-    process.env.BACKEND_URL
+    'http://localhost:5173', 'https://localhost:5173',
+    'http://127.0.0.1:5173', 'https://127.0.0.1:5173',
+    process.env.FRONTEND_URL, process.env.BACKEND_URL
 ].filter(Boolean);
 app.use(cors({
     origin: (origin, callback) => callback(null, !origin || allowedOrigins.includes(origin)),
