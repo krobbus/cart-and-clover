@@ -1,32 +1,29 @@
-const configuredBase = import.meta.env.VITE_API_URL?.replace(/\/+$/, '');
-const productionUrl = import.meta.env.PRODUCTION_API_URL?.replace(/\/+$/, '');
+const productionUrl = import.meta.env.PRODUCTION_API_URL?.trim().replace(/\/+$/, '');
+const configuredBase = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '');
+const token = import.meta.env.TOKEN?.trim().replace(/\/+$/, '');
 
-function isLoopbackUrl(value) {
+function isPublicApiUrl(value) {
     if (!value) return false;
 
     try {
-        const hostname = new URL(value).hostname;
-        return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+        const url = new URL(value);
+        return (
+            (url.protocol === 'http:' || url.protocol === 'https:') &&
+            !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)
+        );
     } catch {
         return false;
     }
 }
 
-const useProductionFallback = import.meta.env.PROD && isLoopbackUrl(configuredBase);
 const BASE = import.meta.env.PROD
-    ? (useProductionFallback ? productionUrl : configuredBase || productionUrl)
+    ? (isPublicApiUrl(configuredBase) ? configuredBase : productionUrl)
     : configuredBase || '';
 
-if (useProductionFallback) {
-    console.warn(`Ignoring loopback VITE_API_URL in production; using ${productionUrl}.`);
-}
-
-const TOKEN_KEY = 'key.token';
-
 export const tokenStore = {
-    get: () => localStorage.getItem(TOKEN_KEY),
-    set: (t) => localStorage.setItem(TOKEN_KEY, t),
-    clear: () => localStorage.removeItem(TOKEN_KEY),
+    get: () => localStorage.getItem(token),
+    set: (t) => localStorage.setItem(token, t),
+    clear: () => localStorage.removeItem(token),
 };
 
 export class ApiError extends Error {
